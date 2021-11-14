@@ -57,5 +57,5 @@ such that *...\liblsl-Matlab\_EEG_scripts\Stream_Visualization\BCI_Comp_III_IIB_
 -read the commentary at the top of the script as you may want to change some variables
 
 ### At this point, the first instance should be streaming data through OpenBCI's LSL and the second should be displaying it. It should look something like this:
-![Stream Visualization Example Image](https://ibb.co/L6Mwkgm)
+![Stream Visualization Example Image](https://i.ibb.co/y5DTfkt/stream-vis.png)
 ### To close the programs, ***FIRST*** stop *Plot_Stream_Data*, ***THEN*** stop *Simulate_Stream_BCI_Comp_III_IIB*
