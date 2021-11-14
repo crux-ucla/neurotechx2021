@@ -4,16 +4,17 @@
 -I have only ensured that it works with MATLAB R2021B desktop edition
 -you should have access to it for free through UCLA
 
-### Step 1: install the libsls-Matlab folder from this repo **only**
+### Step 1: download the libsls-Matlab folder from this repo **only**
 -you do not need to install libLSL from the OpenBCI repo
 	
-### Step 2: download BCI Competition III problem IIB P300 data
+### Step 2: download the BCI Competition III problem IIB P300 data
 -I have uploaded this data to the club's google drive
 -alternatively, it is publicly available from the BCI Competition website (account necessary)
 	-(if you get the data from the website, you will need to rename the folder)
 	
-### Step 3: move the data inside of the following directory:
+### Step 3: move the BCI Competition data inside of the following directory:
 *...\liblsl-Matlab\_EEG_scripts\Stream_Visualization*
+such that *...\liblsl-Matlab\_EEG_scripts\Stream_Visualization\BCI_Comp_III_IIB_Data* exists
 	 
 ### Step 4: ensure matlab has an internal C/C++ compiler linked for building MEX files
 -check by running the following command in the MATLAB command line:
