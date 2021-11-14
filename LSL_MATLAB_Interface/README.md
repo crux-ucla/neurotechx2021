@@ -13,7 +13,7 @@
 	-(if you get the data from the website, you will need to rename the folder)
 	
 ### Step 3: move the data inside of the following directory:
-*...\liblsl-Matlab\_EEG_scripts\Stream_Visualization\*
+*...\liblsl-Matlab\_EEG_scripts\Stream_Visualization*
 	 
 ### Step 4: ensure matlab has an internal C/C++ compiler linked for building MEX files
 -check by running the following command in the MATLAB command line:
@@ -45,7 +45,7 @@
 	-click Add To Path --> Selected Folder and Subfolders
 
 ### Step 3: in both instances, naviagate inside of:
- *...\liblsl-Matlab\_EEG_scripts\Stream_Visualization\*
+ *...\liblsl-Matlab\_EEG_scripts\Stream_Visualization*
 
 ### Step 4: in one instance, open and run *Simulate_Stream_BCI_Comp_III_IIB*
 -alternatively, you can simulate random normal numbers by opening:
