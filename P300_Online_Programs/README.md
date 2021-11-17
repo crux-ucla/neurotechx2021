@@ -2,7 +2,7 @@
 
 This directory contains all of the necessary programs to perform P300 trials with the OpenBCI cap. It is assumed that MATLAB LSL interface is setup and Python LSL interface is setup; they are required.
 
-This commit contains sloppy code is not appropriately commented in som places. It is commited solely for the purpose of ensuring that the team has a working copy of the code on the GITHUB repo.
+This commit contains sloppy code and is not appropriately commented in some areas. It is committed solely for the purpose of ensuring that the team has a working copy of this code on the Github repo.
 
 #### Step 1: Connect the OpenBCI cap, launch the OpenBCI gui, and start a data stream
 
