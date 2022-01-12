@@ -167,7 +167,11 @@ def display_keys():
     # Display keys
     for key in keys:
         if(key[2] == True):
-            pygame.draw.rect(screen,(random.randint(0,255),random.randint(0,255),random.randint(0,255)), [key[1][0]-20, key[1][1]-10, 100, 100])
+            #if drawing colors
+            #pygame.draw.rect(screen,(random.randint(0,255),random.randint(0,255),random.randint(0,255)), [key[1][0]-20, key[1][1]-10, 100, 100])
+            #if drawing images
+            randImg = random.randrange(0,7)
+            screen.blit(face[randImg],[key[1][0]-20, key[1][1]-10, 100, 100])
         else:
             screen.blit(key[0], key[1])
         pygame.draw.rect(screen, WHITE, [key[1][0]-20, key[1][1]-10, 100, 100], 3)
@@ -193,6 +197,11 @@ WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
+
+#define Einstein's face
+face = [None] * 8
+for i in range(8):
+    face[i] = pygame.image.load('face_images/'+str(i)+'.jpg')
  
 # Set the height and width of the screen
 #SCREEN_DIMENSIONS = [1152/2,648/2]
@@ -282,4 +291,3 @@ while not done:
     
 # Be IDLE friendly
 pygame.quit()
-
