@@ -1,10 +1,14 @@
+import os
 from tkinter import *
 import numpy as np
 import time as t
-import sys
+from PIL import Image, ImageTk
 
+os.chdir(os.path.dirname(__file__))
+os.chdir("../P300_Online_Programs/face_images")
+pathdir = os.getcwd()
 class SampleApp(Tk):
-        
+    
     def __init__(self, *args, **kwargs):
         Tk.__init__(self, *args, **kwargs)
         self.x = 0
@@ -12,70 +16,80 @@ class SampleApp(Tk):
         self.b.pack()
         self.configure(bg="Black")  # choose color of the background before the light starts flashing here
 
+    def getIm(num, size):
+        pic = Image.open(str(num) + ".jpg")
+        resize_im = pic.resize((size,size))
+        return ImageTk.PhotoImage(resize_im)
+
+
     def change_x_won(self):
         
+        #canvas setup
         self.b.pack_forget()
-        self.canvas = Canvas(self.master, highlightthickness =0) #create canvas to draw on
+        self.canvas = Canvas(self.master,highlightthickness=0) #create canvas to draw on
         self.canvas.configure(bg = 'black')
 
         #initialize stuff
         h = self.winfo_height()
         w = self.winfo_width()
-        size = h / 4
+        size = round(h / 4)
+        
+        #image choose
+        imtype = [[]*2 for _ in range(5)]
+        imtype[0] = [0,5]
+        imtype[1] = [1,5]
+        imtype[2] = [2,5]
+        imtype[3] = [3,5]
+        imtype[4] = [4,5]
+
+        #get image path
+        os.chdir(os.path.dirname(__file__))
+        os.chdir("../P300_Online_Programs/face_images")
 
         #placement
         centerx = [w/2, size/2, w-size/2, size/2, w-size/2]
         centery = [h/2, size/2, size/2, h-size/2, h-size/2]
-        x1 = centerx - size/2 * np.ones(5)
-        x2 = centerx + size/2 * np.ones(5)
-        y1 = centery - size/2 * np.ones(5)
-        y2 = centery + size/2 * np.ones(5)
-
-        sec = 50 * 1000 #time for flash (in ms)
-
-        color = [[]*2 for _ in range(5)]
-        color[0] = ["Red","Black"]
-        color[1] = ["Green","Black"]
-        color[2] = ["Blue","Black"]
-        color[3] = ["Magenta","Black"]
-        color[4] = ["White","Black"]
         
-        #letters
-        textletter =["a","b","c","d","e"]
+        #times
+        sec = 50 * 1000 #time for flash (in ms)
         freqs = [2,2.6,3.5,4.4,5.3] #flashing frequency
 
         def times(time_end, freq):
             full = np.arange(0, time_end, freq)
             return full
-            
-        text = []
+
+        #intitialize display
         time = []
-        rec = []
+        images = []
+        label = []
         for i in range(5):
-            #list of times to change color in seconds (can do more... like to 5)
             time.append(times(sec, freqs[i]))
             
-            #create objects, (if set as variable, can later create loops to change color)
-            rec.append(self.canvas.create_rectangle(x1[i],y1[i],x2[i],y2[i],fill = color[i][0],outline=""))
-            text.append(Label(self, text = textletter[i], bg = color[i][0], bd = 0,
-                         font = ("Helvetica", 40)))
-            text[i].place(x=centerx[i],y=centery[i], anchor="center")
+            images.append(SampleApp.getIm(i,size))
+           
+            #generate image
+            label.append(Label(image=images[i],bd = 0))
+            label[i].image = images[i]
+            label[i].place(x=centerx[i],y=centery[i],anchor="center")
+        
         self.canvas.pack(fill = BOTH, expand = 1)
 
-        temptime = np.zeros(5, dtype=int)
-        colors = np.zeros(5, dtype = bool)
+        #generate black box image
+        images.append(ImageTk.PhotoImage(Image.new('RGB',(size,size))))
 
+        #main flashing loop
+        temptime = np.zeros(5, dtype=int)
+        states = np.zeros(5, dtype = bool)
+        
         for i in range(sec):
             for j in range(5):
                 if i >= time[j][temptime[j]] and time[j][temptime[j]] != time[j][-1]:
-                    colors[j] = not colors[j]
-                    self.canvas.itemconfig(rec[j],fill=color[j][colors[j]]) #example of changing rectangle color
-                    text[j].configure(bg = color[j][colors[j]])
+                    states[j] = not states[j]
+                    label[j].configure(image = images[imtype[j][states[j]]])
                     temptime[j] += 1
         
             self.canvas.update() # draw canvas (loop needs to be centered around this)
             t.sleep(0.001)
-
 
 if __name__ == "__main__":
     root = SampleApp()
