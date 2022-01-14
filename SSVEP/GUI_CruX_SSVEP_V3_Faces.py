@@ -50,9 +50,10 @@ class SampleApp(Tk):
         centerx = [w/2, size/2, w-size/2, size/2, w-size/2]
         centery = [h/2, size/2, size/2, h-size/2, h-size/2]
         
-        #times
+        #static values
         sec = 50 * 1000 #time for flash (in ms)
         freqs = [2,2.6,3.5,4.4,5.3] #flashing frequency
+        textletter =["a","b","c","d","e"]
 
         def times(time_end, freq):
             full = np.arange(0, time_end, freq)
@@ -68,7 +69,7 @@ class SampleApp(Tk):
             images.append(SampleApp.getIm(i,size))
            
             #generate image
-            label.append(Label(image=images[i],bd = 0))
+            label.append(Label(text=textletter[i],image=images[i],fg="white",font = ("Helvetica", 40),compound="center",bd=0))
             label[i].image = images[i]
             label[i].place(x=centerx[i],y=centery[i],anchor="center")
         
@@ -80,7 +81,7 @@ class SampleApp(Tk):
         #main flashing loop
         temptime = np.zeros(5, dtype=int)
         states = np.zeros(5, dtype = bool)
-        
+
         for i in range(sec):
             for j in range(5):
                 if i >= time[j][temptime[j]] and time[j][temptime[j]] != time[j][-1]:
@@ -90,6 +91,7 @@ class SampleApp(Tk):
         
             self.canvas.update() # draw canvas (loop needs to be centered around this)
             t.sleep(0.001)
+        
 
 if __name__ == "__main__":
     root = SampleApp()
