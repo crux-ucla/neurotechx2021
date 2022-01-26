@@ -159,12 +159,36 @@ def init_keys():
 
     pass
 
+bucket = [None] * 40
+for i in range(len(bucket)):
+    bucket[i] = i
+    
 # Update dynamic keys
-def update_keys():    
+def update_keys(bucket):   
+    
+    #init keys to false
     for i in range (len(keys)):
-        stim = random.choice([False,False,False,False,False,True])
-        keys[i] = (keys[i][0],keys[i][1],stim)
-
+        keys[i] = (keys[i][0],keys[i][1],False)
+        
+    #set of 7 key codes to highlight
+    sel = set()
+        
+    #select 7 key codes from the current bucket and remove them from the bucket
+    while(len(sel) < 7):
+        #check if bucket is empty
+        if(len(bucket)==0):
+            bucket = [None] * 40
+            for i in range(len(bucket)):
+                bucket[i] = i
+        #get a random charcode out of the bucket
+        r = random.randint(0,len(bucket)-1)
+        sel.add(bucket[r])
+        del bucket[r]
+        
+    #set those 7 key codes to true so they flash for this round
+    for c in sel:
+        keys[c] = (keys[c][0],keys[c][1],True)
+        
 def display_keys():  
     
     # Display current target
@@ -172,6 +196,7 @@ def display_keys():
     txt = font.render(currentTarget, True, WHITE)
     screen.blit(txt, [835,10])
 
+    img_id = random.randint(0,7)
     # Display keys
     for key in keys:
         if(key[2] == True):
@@ -180,8 +205,8 @@ def display_keys():
             #pygame.draw.rect(screen,(random.randint(0,255),random.randint(0,255),random.randint(0,255)), [key[1][0]-20, key[1][1]-10, 100, 100])
             
             #if drawing images
-            randImg = random.randrange(0,7)
-            screen.blit(face[randImg],[key[1][0]-20, key[1][1]-10, 200, 200])
+            screen.blit(face[img_id%8],[key[1][0]-20, key[1][1]-10, 200, 200])
+            img_id += 1
         else:
             screen.blit(key[0], key[1])
         pygame.draw.rect(screen, WHITE, [key[1][0]-20, key[1][1]-10, 100, 100], 3)
@@ -200,13 +225,15 @@ def menu_screen():
         screen.fill(BLACK)
         
         # write instruction sentences
-        a = 335
+        a = 235
         txt = font.render("Press '1' to enter training mode.", True, WHITE)
         screen.blit(txt, [390, a])
         txt = font.render("Press '2' to enter user mode.", True, WHITE)
         screen.blit(txt, [390, a+150*1])
         txt = font.render("Press '0' to return to this menu.", True, WHITE)
         screen.blit(txt, [390, a+150*2])
+        txt = font.render("Press space bar to pause.", True, WHITE)
+        screen.blit(txt, [390, a+150*3])
         
         # render
         pygame.display.flip()
@@ -250,7 +277,7 @@ init_keys()
 
 #init timer
 stimTime = time.time();
-targetTime = time.time();
+targetTime = 0;
 
 # Loop until the user clicks the close button.
 mode = 0
@@ -260,28 +287,53 @@ clock = pygame.time.Clock()
 panogram = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
 charList = [char for char in panogram]
 currentTarget = pick_target(charList)
+
+spaceDown = False;
     
-while (mode != -1):
+while (mode != -999):
  
     # check if window closed
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            mode = -1
+            mode = -999
             
     # exit when esc is pressed
     pressed_keys = pygame.key.get_pressed()
     if(pressed_keys[pygame.K_ESCAPE]):
         pygame.quit()
         exit()
+    # pause when space is pressed
+    if(pressed_keys[pygame.K_SPACE] and not spaceDown):
+        mode = -1 * mode # pause flip
+        spaceDown = True
+        if(mode>0):
+            end = time.time()
+            stimTime = end - stimTime
+            targetTime = end - targetTime
+        elif(mode<0):
+            end = time.time()
+            stimTime = end - stimTime
+            targetTime = end - targetTime            
+    # detect lifting of space bar
+    elif(not pressed_keys[pygame.K_SPACE]):
+        spaceDown = False        
+    # if in a keyboard mode
     if(mode==1 or mode==2):
+        # return to menu if 0 is pressed
         if(pressed_keys[pygame.K_0]):
-            mode = 0    #paused/menu screen
-            menu_screen()       
+            mode = 0    #menu screen
+            menu_screen()    
+    # if in menu
     if(mode==0):
         if(pressed_keys[pygame.K_1]):
             mode = 1    #training mode
+            stimTime = time.time();
+            targetTime = 0;
         if(pressed_keys[pygame.K_2]):
             mode = 2    #user mode
+            stimTime = time.time();
+            targetTime = 0;
+        
     
         
     if(mode==1 or mode==2):
@@ -289,17 +341,21 @@ while (mode != -1):
         end = time.time()        
         
         # Check stimuli timer
-        if(end-stimTime>0.152):
+        if(end-stimTime>0.12):
             
             # Overwrite the screen with a background color
             screen.fill(BLACK)
             
             # reset timer
             stimTime = end
-            
+                        
             # update key status
-            update_keys()
-            
+            update_keys(bucket)
+            if(len(bucket)==0):
+                bucket = [None] * 40
+                for i in range(len(bucket)):
+                    bucket[i] = i
+                        
             # display keys
             display_keys()
         
@@ -329,7 +385,7 @@ while (mode != -1):
             display_keys()
             
             pygame.display.flip()
-            time.sleep(2.69)
+            time.sleep(1.69)
             
         # Go ahead and update the screen with what we've drawn.
         # This MUST happen after all the other drawing commands.
