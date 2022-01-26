@@ -200,10 +200,13 @@ def menu_screen():
         screen.fill(BLACK)
         
         # write instruction sentences
+        a = 335
         txt = font.render("Press '1' to enter training mode.", True, WHITE)
-        screen.blit(txt, [400, 400])
+        screen.blit(txt, [390, a])
         txt = font.render("Press '2' to enter user mode.", True, WHITE)
-        screen.blit(txt, [400, 550])
+        screen.blit(txt, [390, a+150*1])
+        txt = font.render("Press '0' to return to this menu.", True, WHITE)
+        screen.blit(txt, [390, a+150*2])
         
         # render
         pygame.display.flip()
