@@ -270,13 +270,15 @@ while (mode != -1):
     if(pressed_keys[pygame.K_ESCAPE]):
         pygame.quit()
         exit()
-    if(pressed_keys[pygame.K_0]):
-        mode = 0    #paused/menu screen
-        menu_screen()       
-    if(pressed_keys[pygame.K_1]):
-        mode = 1    #training mode
-    if(pressed_keys[pygame.K_2]):
-        mode = 2    #user mode
+    if(mode==1 or mode==2):
+        if(pressed_keys[pygame.K_0]):
+            mode = 0    #paused/menu screen
+            menu_screen()       
+    if(mode==0):
+        if(pressed_keys[pygame.K_1]):
+            mode = 1    #training mode
+        if(pressed_keys[pygame.K_2]):
+            mode = 2    #user mode
     
         
     if(mode==1 or mode==2):
