@@ -64,7 +64,7 @@ def init_keys():
     r3 = 880
     
     # row 3
-    a = 125
+    a = 100
     txt = font.render("1", True, WHITE)
     keys[27] = (txt,[a+170*0,r0],False)
     txt = font.render("2", True, WHITE)
@@ -85,9 +85,11 @@ def init_keys():
     keys[35] = (txt,[a+170*8,r0],False)
     txt = font.render("0", True, WHITE)
     keys[36] = (txt,[a+170*9,r0],False)
+    #backspace key
+    keys[37] = (bkspc,[a+170*10,r0],False)
 
     # row 1
-    a = 125
+    a = 100
     txt = font.render("Q", True, WHITE)
     keys[0] = (txt,[a+170*0,r1],False)
     txt = font.render("W", True, WHITE)
@@ -110,7 +112,7 @@ def init_keys():
     keys[9] = (txt,[a+170*9,r1],False)
     
     # row 2
-    a = 170
+    a = 145
     txt = font.render("A", True, WHITE)
     keys[10] = (txt,[a+170*0,r2],False)
     txt = font.render("S", True, WHITE)
@@ -129,9 +131,11 @@ def init_keys():
     keys[17] = (txt,[a+170*7,r2],False)
     txt = font.render("L", True, WHITE)
     keys[18] = (txt,[a+170*8,r2],False)
+    #the quick brown fox key
+    keys[38] = (tqbfjotld,[100+170*10,r2],False)
     
     # row 3
-    a = 245
+    a = 220
     txt = font.render("Z", True, WHITE)
     keys[19] = (txt,[a+170*0,r3],False)
     txt = font.render("X", True, WHITE)
@@ -148,13 +152,17 @@ def init_keys():
     keys[25] = (txt,[a+170*6,r3],False)
     txt = font.render("_", True, WHITE)
     keys[26] = (txt,[a+170*7,r3],False)
+    #the quick brown fox key
+    keys[39] = (nlp_toggle,[100+170*10,r3],False)
+    
+    # other keys
 
     pass
 
 # Update dynamic keys
 def update_keys():    
     for i in range (len(keys)):
-        stim = random.choice([False,False,False,False,False,False,False,False,False,True])
+        stim = random.choice([False,False,False,False,False,True])
         keys[i] = (keys[i][0],keys[i][1],stim)
 
 def display_keys():  
@@ -167,11 +175,13 @@ def display_keys():
     # Display keys
     for key in keys:
         if(key[2] == True):
+            
             #if drawing colors
             #pygame.draw.rect(screen,(random.randint(0,255),random.randint(0,255),random.randint(0,255)), [key[1][0]-20, key[1][1]-10, 100, 100])
+            
             #if drawing images
             randImg = random.randrange(0,7)
-            screen.blit(face[randImg],[key[1][0]-20, key[1][1]-10, 100, 100])
+            screen.blit(face[randImg],[key[1][0]-20, key[1][1]-10, 200, 200])
         else:
             screen.blit(key[0], key[1])
         pygame.draw.rect(screen, WHITE, [key[1][0]-20, key[1][1]-10, 100, 100], 3)
@@ -184,11 +194,25 @@ def pick_target(charList):
     charList.remove(currentTarget)
     return currentTarget
 
+def menu_screen():
+    
+        # overwrite the screen with a background color
+        screen.fill(BLACK)
+        
+        # write instruction sentences
+        txt = font.render("Press '1' to enter training mode.", True, WHITE)
+        screen.blit(txt, [400, 400])
+        txt = font.render("Press '2' to enter user mode.", True, WHITE)
+        screen.blit(txt, [400, 550])
+        
+        # render
+        pygame.display.flip()
+    
 # Initialize the gui engine
 pygame.init()
  
 # Init outlet
-info = StreamInfo("stimuli", "stimuli", 38, 125, "int8")
+info = StreamInfo("stimuli", "stimuli", 41, 125, "int8")
 outlet = StreamOutlet(info)
 
 # Define the colors we will use in RGB format
@@ -202,6 +226,9 @@ RED = (255, 0, 0)
 face = [None] * 8
 for i in range(8):
     face[i] = pygame.image.load('face_images/'+str(i)+'.jpg')
+bkspc = pygame.image.load('backspace_image.png')
+tqbfjotld = pygame.image.load('tqbfjotld_image.png')
+nlp_toggle = pygame.image.load('nlp_image.png')
  
 # Set the height and width of the screen
 #SCREEN_DIMENSIONS = [1152/2,648/2]
@@ -215,7 +242,7 @@ font = pygame.font.SysFont('Calibri', 90, True, False)
 
 # Define key list
 # each key --> (label-string,location-tuple,isTarget-bool)
-keys = [None] * 37
+keys = [None] * 40
 init_keys()
 
 #init timer
@@ -223,71 +250,89 @@ stimTime = time.time();
 targetTime = time.time();
 
 # Loop until the user clicks the close button.
-done = False
+mode = 0
+menu_screen()
 clock = pygame.time.Clock()
 
 panogram = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
 charList = [char for char in panogram]
 currentTarget = pick_target(charList)
-
-while not done:
+    
+while (mode != -1):
  
-    # Check if window closed
+    # check if window closed
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            done = True
- 
-    # check timers
-    end = time.time()        
+            mode = -1
+            
+    # exit when esc is pressed
+    pressed_keys = pygame.key.get_pressed()
+    if(pressed_keys[pygame.K_ESCAPE]):
+        pygame.quit()
+        exit()
+    if(pressed_keys[pygame.K_0]):
+        mode = 0    #paused/menu screen
+        menu_screen()       
+    if(pressed_keys[pygame.K_1]):
+        mode = 1    #training mode
+    if(pressed_keys[pygame.K_2]):
+        mode = 2    #user mode
     
-    # Check stimuli timer
-    if(end-stimTime>0.152):
         
-        # Overwrite the screen with a background color
-        screen.fill(BLACK)
+    if(mode==1 or mode==2):
+        # check timers
+        end = time.time()        
         
-        # reset timer
-        stimTime = end
+        # Check stimuli timer
+        if(end-stimTime>0.152):
+            
+            # Overwrite the screen with a background color
+            screen.fill(BLACK)
+            
+            # reset timer
+            stimTime = end
+            
+            # update key status
+            update_keys()
+            
+            # display keys
+            display_keys()
         
-        # update key status
-        update_keys()
+            # send stim codes after they have been displayed
+            mysample = [0] * 41
+            for i in range(len(keys)):
+                mysample[i] = keys[i][2]
+                mysample[40] = panogram.index(currentTarget) 
         
-        # display keys
-        display_keys()
-    
-        # send stim codes after they have been displayed
-        mysample = [random.randint(0,1) for _ in range(37)]
-        outlet.push_sample(mysample+[panogram.index(currentTarget)])    
-    
-    # Check target char timer
-    if(end-targetTime>20):
-        
-        # Overwrite the screen with a background color
-        screen.fill(BLACK)
-        
-        # Pick a new target
-        currentTarget = pick_target(charList)
-        
-        # reset timer
-        targetTime = end
-        
-        # do not stimulate any keys
-        for i in range(len(keys)):
-            keys[i] = (keys[i][0],keys[i][1],False)
-        
-        # display keys
-        display_keys()
-        
+        # Check target char timer
+        if(end-targetTime>20):
+            
+            # Overwrite the screen with a background color
+            screen.fill(BLACK)
+            
+            # Pick a new target
+            currentTarget = pick_target(charList)
+            
+            # reset timer
+            targetTime = end
+            
+            # do not stimulate any keys
+            for i in range(len(keys)):
+                keys[i] = (keys[i][0],keys[i][1],False)
+            
+            # display keys
+            display_keys()
+            
+            pygame.display.flip()
+            time.sleep(2.69)
+            
+        # Go ahead and update the screen with what we've drawn.
+        # This MUST happen after all the other drawing commands.
         pygame.display.flip()
-        time.sleep(2.69)
-        
-    # Go ahead and update the screen with what we've drawn.
-    # This MUST happen after all the other drawing commands.
-    pygame.display.flip()
- 
-    # This limits the while loop to a max of 10 times per second.
-    # Leave this out and we will use all CPU we can.
-    clock.tick(250)
+     
+        # This limits the while loop to a max of 10 times per second.
+        # Leave this out and we will use all CPU we can.
+        clock.tick(250)
     
 # Be IDLE friendly
 pygame.quit()
