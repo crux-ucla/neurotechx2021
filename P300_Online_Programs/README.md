@@ -28,3 +28,5 @@ This commit contains sloppy code and is not appropriately commented in some area
 	-This will permanently save the trial data to your drive.
 
 #### Step 7: Close *P300_GUI_and_Stimuli.py* and disconnect OpenBCI
+
+![Data Flow Diagram](https://i.imgur.com/bSRRk9f.png)
