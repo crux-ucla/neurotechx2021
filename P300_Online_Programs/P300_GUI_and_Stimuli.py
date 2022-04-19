@@ -152,7 +152,7 @@ def init_keys():
     keys[25] = (txt,[a+170*6,r3],False)
     txt = font.render("_", True, WHITE)
     keys[26] = (txt,[a+170*7,r3],False)
-    #the quick brown fox key
+    #the t key
     keys[39] = (nlp_toggle,[100+170*10,r3],False)
     
     # other keys
@@ -190,22 +190,33 @@ def update_keys(bucket):
         keys[c] = (keys[c][0],keys[c][1],True)
         
 def display_keys():  
-    
+                
     # Display current target
     font = pygame.font.SysFont('Calibri', 250, True, False)
-    txt = font.render(currentTarget, True, WHITE)
-    screen.blit(txt, [835,10])
+    if (currentTarget == 'd'):
+        txt = font.render('del', True, WHITE)
+        screen.blit(txt, [740,10])
+    elif (currentTarget == 'b'):
+        txt = font.render('fox', True, WHITE)
+        screen.blit(txt, [740,10])
+    elif (currentTarget == 'n'):
+        txt = font.render('nlp', True, WHITE)
+        screen.blit(txt, [740,10])
+    else:
+        txt = font.render(currentTarget, True, WHITE)
+        screen.blit(txt, [835,10])
 
-    img_id = random.randint(0,7)
+    img_id = random.randint(0,9)
     # Display keys
     for key in keys:
+        pygame.draw.rect(screen,(55,55,55), [key[1][0]-20, key[1][1]-10, 100, 100])
         if(key[2] == True):
             
             #if drawing colors
             #pygame.draw.rect(screen,(random.randint(0,255),random.randint(0,255),random.randint(0,255)), [key[1][0]-20, key[1][1]-10, 100, 100])
             
             #if drawing images
-            screen.blit(face[img_id%8],[key[1][0]-20, key[1][1]-10, 200, 200])
+            screen.blit(face[img_id%10],[key[1][0]-20, key[1][1]-10, 200, 200])
             img_id += 1
         else:
             screen.blit(key[0], key[1])
@@ -237,12 +248,22 @@ def menu_screen():
         
         # render
         pygame.display.flip()
-    
+        
+# Attempt to grab the FTDI device
+import ftd2xx as ftd
+d = ftd.open(0)
+print(d.getDeviceInfo())
+OP = 0x07           # Bit mask for output D0
+d.setBitMode(OP, 1)  # Set pin as output, and async bitbang mode
+
+state = 0x07
+d.write(str(state))      # Init high
+
 # Initialize the gui engine
 pygame.init()
  
 # Init outlet
-info = StreamInfo("stimuli", "stimuli", 41, 125, "int8")
+info = StreamInfo("stim", "stim", 41, 125, "int8")
 outlet = StreamOutlet(info)
 
 # Define the colors we will use in RGB format
@@ -252,10 +273,10 @@ BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
-#define Einstein's face
-face = [None] * 8
-for i in range(8):
-    face[i] = pygame.image.load('face_images/'+str(i)+'.jpg')
+#define face's
+face = [None] * 10
+for i in range(10):
+    face[i] = pygame.image.load('league_icons/'+str(i)+'.jpg')
 bkspc = pygame.image.load('backspace_image.png')
 tqbfjotld = pygame.image.load('tqbfjotld_image.png')
 nlp_toggle = pygame.image.load('nlp_image.png')
@@ -276,15 +297,15 @@ keys = [None] * 40
 init_keys()
 
 #init timer
-stimTime = time.time();
-targetTime = 0;
+stimTime = -1;
+targetTime = -1;
 
 # Loop until the user clicks the close button.
 mode = 0
 menu_screen()
 clock = pygame.time.Clock()
 
-panogram = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
+panogram = "QWERTYUIOPASDFGHJKLZXCVBNM_1234567890dbn"
 charList = [char for char in panogram]
 currentTarget = pick_target(charList)
 
@@ -300,8 +321,11 @@ while (mode != -999):
     # exit when esc is pressed
     pressed_keys = pygame.key.get_pressed()
     if(pressed_keys[pygame.K_ESCAPE]):
+        time.sleep(5)
+        outlet.__del__()
         pygame.quit()
         exit()
+        
     # pause when space is pressed
     if(pressed_keys[pygame.K_SPACE] and not spaceDown):
         mode = -1 * mode # pause flip
@@ -316,76 +340,120 @@ while (mode != -999):
             targetTime = end - targetTime            
     # detect lifting of space bar
     elif(not pressed_keys[pygame.K_SPACE]):
-        spaceDown = False        
-    # if in a keyboard mode
-    if(mode==1 or mode==2):
-        # return to menu if 0 is pressed
-        if(pressed_keys[pygame.K_0]):
-            mode = 0    #menu screen
-            menu_screen()    
+        spaceDown = False       
+                    
     # if in menu
     if(mode==0):
         if(pressed_keys[pygame.K_1]):
-            mode = 1    #training mode
-            stimTime = time.time();
-            targetTime = 0;
+            #let matlab catch up
+            time.sleep(5)
+            #training mode
+            mode = 1   
+            # Overwrite the screen with a background color
+            screen.fill(BLACK)
+            # display keys
+            display_keys()
+            targetTime = time.time();
+            #render
+            pygame.display.flip()
+            time.sleep(1.69)
+            #init timers
+            stimTime = time.time()-.121;
         if(pressed_keys[pygame.K_2]):
+            time.sleep(5)
             mode = 2    #user mode
             stimTime = time.time();
             targetTime = 0;
-        
-    
-        
+            
+    #if in keyboard mode
     if(mode==1 or mode==2):
+        
+        # return to menu if 0 is pressed
+        if(pressed_keys[pygame.K_0]):
+            mode = 0    #menu screen
+            menu_screen()   
+            
         # check timers
         end = time.time()        
         
         # Check stimuli timer
         if(end-stimTime>0.12):
             
-            # Overwrite the screen with a background color
-            screen.fill(BLACK)
-            
-            # reset timer
-            stimTime = end
+            if(end-targetTime<30):
+                
+                # Overwrite the screen with a background color
+                screen.fill(BLACK)
+                
+                # reset timer
+                stimTime = end
+                            
+                # update key status
+                update_keys(bucket)
+                if(len(bucket)==0):
+                    bucket = [None] * 40
+                    for i in range(len(bucket)):
+                        bucket[i] = i
+                
+                # display keys
+                display_keys()
+                
+                # if this is a target
+                if(keys[panogram.find(currentTarget)][2]==True):
+                    # invert all 3 triggers
+                    if (state == 0x00):
+                        state = 0x07
+                    elif (state == 0x07):
+                        state = 0x00
+                    elif (state == 0x03):
+                        state = 0x04
+                    elif (state == 0x04):
+                        state = 0x03
+                # else, this is not a target
+                else:
+                    # invert the first 2 triggers
+                    if (state == 0x00):
+                        state = 0x03
+                    elif (state == 0x07):
+                        state = 0x04
+                    elif (state == 0x03):
+                        state = 0x00
+                    elif (state == 0x04):
+                        state = 0x07
                         
-            # update key status
-            update_keys(bucket)
-            if(len(bucket)==0):
-                bucket = [None] * 40
-                for i in range(len(bucket)):
-                    bucket[i] = i
-                        
-            # display keys
-            display_keys()
-        
-            # send stim codes after they have been displayed
-            mysample = [0] * 41
-            for i in range(len(keys)):
-                mysample[i] = keys[i][2]
-                mysample[40] = panogram.index(currentTarget) 
-        
-        # Check target char timer
-        if(end-targetTime>20):
-            
-            # Overwrite the screen with a background color
-            screen.fill(BLACK)
-            
-            # Pick a new target
-            currentTarget = pick_target(charList)
-            
-            # reset timer
-            targetTime = end
-            
-            # do not stimulate any keys
-            for i in range(len(keys)):
-                keys[i] = (keys[i][0],keys[i][1],False)
-            
-            # display keys
-            display_keys()
-            
-            pygame.display.flip()
-            time.sleep(1.69)
+                d.write(str(state))  
+                            
+                # send stim codes after keys have been displayed
+                mysample = [0] * 41
+                for i in range(len(keys)):
+                    if(keys[i][2]):
+                        mysample[i] = 1
+                    else:
+                        mysample[i] = 0
+                mysample[40] = panogram.index(currentTarget)+1
+                
+                outlet.push_sample(mysample)
+            # Check target char timer
+            elif(end-targetTime>=30):
+                
+                # Overwrite the screen with a background color
+                screen.fill(BLACK)
+                
+                # Pick a new target
+                currentTarget = pick_target(charList)
+                
+                # reset target timer
+                targetTime = end
+                
+                # do not stimulate any keys
+                for i in range(len(keys)):
+                    keys[i] = (keys[i][0],keys[i][1],False)
+                
+                # display keys
+                display_keys()  
+                
+                pygame.display.flip()
+                time.sleep(1.69)
+                stimTime = time.time()-.121
             
         # Go ahead and update the screen with what we've drawn.
         # This MUST happen after all the other drawing commands.
