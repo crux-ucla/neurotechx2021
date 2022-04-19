@@ -1,12 +1,37 @@
 import torch
-from pytorch_transformers importGPT2Tokenizer, GPT2LMHeadModel
 
-class WordRecommender(model, tokenizer):
+class WordRecommender:
+    """
+    Word recommendation system
+
+    Attributes:
+        model: torch.nn.Module
+            Neural language model used to predict words
+        tokenizer: transformers.Tokenizer
+            Used to encode/decode input/output for model
+    """
     def __init__(self, model, tokenizer):
+
         self.model = model
         self.tokenizer = tokenizer
 
-    def predict_next_word(text, num_words=3, reject_words=[]):
+    def predict_next_word(self, text, num_words=3, reject_words=[]):
+        """
+        Predicts the next word. If last character typed was a space, predicts the next 
+        word. Otherwise, predicts the current word being typed like an autocomplete system.
+
+        Arguments:
+            text: str
+                Text to predict the current/next word for
+            num_words: int
+                Number of words to suggest
+            reject_words: list(str)
+                Block list for predicted words
+        
+        Returns:
+            word_suggestions: list(str)
+                List of most likely words based on text
+        """
         prev_text, _, next_word_substr = text.rpartition(' ')
 
         if prev_text == '':
@@ -20,12 +45,12 @@ class WordRecommender(model, tokenizer):
         else:
             prev_text += ' '
 
-        tokens = torch.tensor([tokenizer.encode(prev_text)])
+        tokens = torch.tensor([self.tokenizer.encode(prev_text)])
         # Set model to evaluation mode and predict
-        model.eval()
+        self.model.eval()
 
         with torch.no_grad():
-            outputs = model(tokens)
+            outputs = self.model(tokens)
             predictions = outputs[0]
 
         probs = predictions[0, -1, :]
@@ -33,7 +58,7 @@ class WordRecommender(model, tokenizer):
 
         word_suggestions = set()
         for idx in pred_indices:
-            word = tokenizer.decode(idx.item()).strip()
+            word = self.tokenizer.decode(idx.item()).strip()
             if word.startswith(next_word_substr) and word not in reject_words:
                 word_suggestions.add(word)
 
