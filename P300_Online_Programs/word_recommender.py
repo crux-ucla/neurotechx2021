@@ -15,7 +15,7 @@ class WordRecommender:
         self.model = model
         self.tokenizer = tokenizer
 
-    def predict_next_word(self, text, num_words=3, reject_words=[]):
+    def predict_next_word(self, text, num_words=3):
         """
         Predicts the next word. If last character typed was a space, predicts the next 
         word. Otherwise, predicts the current word being typed like an autocomplete system.
@@ -59,10 +59,10 @@ class WordRecommender:
         word_suggestions = set()
         for idx in pred_indices:
             word = self.tokenizer.decode(idx.item()).strip()
-            if word.startswith(next_word_substr) and word not in reject_words:
-                word_suggestions.add(word)
+            if word.startswith(next_word_substr) and word.isalpha():
+                word_suggestions.add(word.lower())
 
             if len(word_suggestions) == num_words:
-                return word_suggestions
+                break
 
-        return word_suggestions
+        return list(word_suggestions)

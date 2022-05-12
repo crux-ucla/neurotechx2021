@@ -7,20 +7,20 @@ class NGramCharacterModel:
     Attributes:
         corpus: str
             Corpus used for training the n-gram model, concatenated into a single string
-        n: int
+        length: int
             Specifies the length of the n-gram
         char_set: list(str)
             List of characters found in the corpus
         ngram_freq: nltk.ConditionalFreqDist
             Conditional frequency distribution of each character in char_set based on previous n-1 characters
     """
-    def __init__(self, corpus, n, char_set):
+    def __init__(self, corpus, length, char_set):
 
-        self.n = n
+        self.length = length
         self.char_set = char_set
 
         # Obtain n-grams from the training corpus and compute the conditional frequency distributions
-        ngrams = nltk.ngrams(corpus, n)
+        ngrams = nltk.ngrams(corpus, length)
         ngram_tuples = list(zip(*ngrams))
         prev_chars = list(zip(*ngram_tuples[:-1]))
         curr_chars = ngram_tuples[-1]
@@ -39,7 +39,7 @@ class NGramCharacterModel:
             freqs: dict(char: float)
                 Conditional frequencies for each character
         """
-        if len(prev_chars) != self.n - 1:
+        if len(prev_chars) != self.length - 1:
             raise ValueError(f"prev_chars must contain {self.n - 1} characters")
 
         conditional_freqs = self.ngram_freq[prev_chars]
